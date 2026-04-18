@@ -562,7 +562,7 @@ const Services = () => {
                 Names that <span className="serif" style={{ fontWeight: 400 }}>stick.</span>
               </h2>
               <p className="thai mt-3 text-base" style={{ color: 'var(--red-dark)' }}>
-                ชื่อที่คนจำ ไม่ใช่แค่ชื่อที่ฟังดี
+                ชื่อที่คนจำ ไม่ใช่แค่ชื่อที่ฟังดูดี
               </p>
             </div>
             <div className="hidden md:flex gap-2">
@@ -733,13 +733,13 @@ const Process = () => {
     {
       n: "01",
       title: "Tell us about your brand",
-      titleTh: "เล่าเรื่องแบรนด์ให้เราฟัง",
+      titleTh: "เล่าเรื่องแบรนด์ของคุณให้เราฟัง",
       desc: "Product, audience, tone, the feeling you want to leave behind. We ask the right questions so nothing gets lost.",
     },
     {
       n: "02",
       title: "Receive five crafted names",
-      titleTh: "รับ 5 ชื่อแบรนด์ในมือ",
+      titleTh: "รับ 5 ชื่อแบรนด์ที่ใช่",
       desc: "Each with concept, meaning, tone notes, and availability checks for domain and socials. 2 to 4 business days.",
     },
   ];
@@ -973,7 +973,7 @@ const FinalCTA = () => {
 
         <Reveal delay={0.1}>
           <p className="thai text-lg md:text-xl mb-4" style={{ color: 'var(--red-dark)' }}>
-            พร้อมทำให้คนต้องถามชื่อแบรนด์คุณรึยัง?
+            พร้อมทำให้คนต้องถามชื่อแบรนด์ของคุณรึยัง?
           </p>
         </Reveal>
 
@@ -1004,7 +1004,7 @@ const FinalCTA = () => {
 
         <Reveal delay={0.4}>
           <p className="mt-5 text-sm" style={{ color: 'var(--red-dark)', opacity: 0.7 }}>
-            No charge until you agree on scope · <span className="thai">ไม่เสียค่าใช้จ่ายจนกว่าจะตกลงจ้างงาน</span>
+            No charge until you agree on scope · <span className="thai">ปรึกษาฟรีก่อนจ้างงาน</span>
           </p>
         </Reveal>
       </div>
@@ -1027,7 +1027,7 @@ const Footer = () => {
             <p className="text-sm leading-relaxed opacity-70 max-w-xs">
               Brand naming studio based in Bangkok.
               <br />
-              <span className="thai">สตูดิโอคิดชื่อแบรนด์ในกรุงเทพฯ</span>
+              <span className="thai">ฮูสแบรนด์</span>
             </p>
           </div>
 
@@ -1063,7 +1063,7 @@ const Footer = () => {
 
         <div className="pt-6 border-t flex flex-col md:flex-row justify-between items-start md:items-center gap-3" style={{ borderColor: 'rgba(255, 229, 232, 0.15)' }}>
           <p className="text-xs opacity-50">© {new Date().getFullYear()} Whosbrand. All rights reserved.</p>
-          <p className="text-xs opacity-50 thai">สร้างด้วยความตั้งใจจากกรุงเทพฯ</p>
+          <p className="text-xs opacity-50 thai">MAKE THEM ASK</p>
         </div>
       </div>
     </footer>
