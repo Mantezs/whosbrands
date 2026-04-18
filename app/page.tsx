@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowRight, ArrowUpRight, Check, Sparkles, Star, MessageCircle, Mail } from 'lucide-react';
+import { ArrowRight, ArrowUpRight, Check, Sparkles, Star, MessageCircle, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Instagram = ({ size = 14 }: { size?: number }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -40,7 +40,6 @@ const BRANDS = [
   },
   {
     name: "ตำลานทอง",
-    nameEn: "Tam Larn Thong",
     category: "Luxury Somtum",
     categoryTh: "ส้มตำพรีเมียม",
     story: "Literally 'pound a million gold'. Elevates a street food icon into a fine dining destination.",
@@ -57,7 +56,6 @@ const BRANDS = [
   },
   {
     name: "ละไมเล",
-    nameEn: "Lamai Le",
     category: "Beach Resort",
     categoryTh: "รีสอร์ทริมทะเล",
     story: "Soft Thai syllables that feel like a sea breeze. Pure atmosphere in a single word.",
@@ -66,7 +64,6 @@ const BRANDS = [
   },
   {
     name: "Ao no Ma",
-    nameJa: "青の間",
     category: "Matcha Tea",
     categoryTh: "ชาเขียวมัทฉะ",
     story: "Japanese for 'the green room'. Minimal, deliberate, tasteful. Fits the ritual of matcha.",
@@ -76,20 +73,19 @@ const BRANDS = [
 ];
 
 const STATS = [
-  { value: "58", label: "Brands Named", labelTh: "แบรนด์ที่ตั้งชื่อ" },
-  { value: "4.8", label: "Average Rating", labelTh: "คะแนนรีวิว", suffix: "★" },
-  { value: "100%", label: "Completion Rate", labelTh: "งานสำเร็จ" },
-  { value: "10", label: "Repeat Clients", labelTh: "ลูกค้ากลับมาจ้างซ้ำ" },
-  { value: "38", label: "Min Response", labelTh: "นาที ตอบกลับเฉลี่ย" },
+  { value: "58", label: "Brands Named", suffix: "" },
+  { value: "4.8", label: "Average Rating", suffix: "★" },
+  { value: "100%", label: "Completion Rate", suffix: "" },
+  { value: "10", label: "Repeat Clients", suffix: "" },
+  { value: "38", label: "Min Response", suffix: "" },
 ];
 
-// --- Hooks ---
 const useScrollY = () => {
   const [scrollY, setScrollY] = useState(0);
   useEffect(() => {
-let rafId: number | null = null;
+    let rafId: number | null = null;
     const onScroll = () => {
-      if (rafId) cancelAnimationFrame(rafId);
+      if (rafId) return;
       rafId = requestAnimationFrame(() => {
         setScrollY(window.scrollY);
         rafId = null;
@@ -104,24 +100,22 @@ let rafId: number | null = null;
   return scrollY;
 };
 
-const useInView = (options = { threshold: 0.15, rootMargin: '-50px' }) => {
-  const ref = useRef(null);
+const useInView = () => {
+  const ref = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     const obs = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) setInView(true);
-    }, options);
+    }, { threshold: 0.15, rootMargin: '-50px' });
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
-  return [ref, inView];
+  return [ref, inView] as const;
 };
 
-// --- Components ---
-
-const Reveal = ({ children, delay = 0, className = '' }) => {
+const Reveal = ({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) => {
   const [ref, inView] = useInView();
   return (
     <div
@@ -138,7 +132,7 @@ const Reveal = ({ children, delay = 0, className = '' }) => {
   );
 };
 
-const QuestionBadge = ({ size = 80, className = '', style = {} }) => (
+const QuestionBadge = ({ size = 80, className = '', style = {} }: { size?: number; className?: string; style?: React.CSSProperties }) => (
   <div
     className={`inline-flex items-center justify-center rounded-full ${className}`}
     style={{
@@ -156,7 +150,7 @@ const QuestionBadge = ({ size = 80, className = '', style = {} }) => (
   </div>
 );
 
-const Header = ({ scrollY }) => {
+const Header = ({ scrollY }: { scrollY: number }) => {
   const scrolled = scrollY > 50;
   return (
     <header
@@ -167,7 +161,7 @@ const Header = ({ scrollY }) => {
         borderBottom: scrolled ? '1px solid rgba(232, 53, 63, 0.15)' : '1px solid transparent',
       }}
     >
-      <div className="max-w-7xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
+      <div className="max-w-5xl mx-auto px-6 md:px-10 h-16 flex items-center justify-between">
         <a href="#top" className="flex items-center gap-2">
           <span style={{ fontFamily: '"Archivo Black"', color: 'var(--red)', fontSize: 20, letterSpacing: '-0.04em' }}>
             whosbrand
@@ -202,11 +196,11 @@ const Header = ({ scrollY }) => {
   );
 };
 
-const Hero = ({ scrollY }) => {
+const Hero = ({ scrollY }: { scrollY: number }) => {
   const [mouse, setMouse] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
-    const onMove = (e) => {
+    const onMove = (e: MouseEvent) => {
       const x = (e.clientX / window.innerWidth - 0.5) * 2;
       const y = (e.clientY / window.innerHeight - 0.5) * 2;
       setMouse({ x, y });
@@ -215,140 +209,184 @@ const Hero = ({ scrollY }) => {
     return () => window.removeEventListener('mousemove', onMove);
   }, []);
 
-  const heroOpacity = Math.max(0, 1 - scrollY / 500);
-  const heroScale = Math.max(0.92, 1 - scrollY / 3000);
-  const heroY = scrollY * 0.3;
+  const heroOpacity = Math.max(0, 1 - scrollY / 700);
+  const whoY = scrollY * -0.08;
+  const brandY = scrollY * -0.13;
+  const questionY = scrollY * -0.22;
+  const taglineX = scrollY * 0.15;
 
   return (
-    <section id="top" className="relative overflow-hidden" style={{ minHeight: '100vh', paddingTop: 80 }}>
-      {/* Floating parallax shapes */}
-      <div className="absolute inset-0 pointer-events-none">
-        {/* Big ? - top right */}
+    <section
+      id="top"
+      className="relative overflow-hidden"
+      style={{
+        minHeight: '100vh',
+        paddingTop: 80,
+        paddingBottom: 140,
+        background:
+          'radial-gradient(ellipse at 75% 15%, rgba(232, 53, 63, 0.22) 0%, transparent 55%), radial-gradient(ellipse at 20% 90%, rgba(248, 167, 174, 0.5) 0%, transparent 50%), linear-gradient(180deg, #ffe5e8 0%, #ffd1d6 100%)',
+      }}
+    >
+      <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1 }}>
         <div
-          className="absolute float-anim"
+          className="absolute"
           style={{
-            top: '12%',
-            right: '8%',
-            transform: `translate(${mouse.x * 20}px, ${mouse.y * 20 + scrollY * -0.15}px) rotate(12deg)`,
+            top: '10%',
+            right: '5%',
+            transform: `translate(${mouse.x * 20}px, ${mouse.y * 20 + scrollY * -0.2}px)`,
             transition: 'transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)',
           }}
         >
-          <div
-            className="rounded-full flex items-center justify-center"
-            style={{
-              width: 140,
-              height: 140,
-              backgroundColor: 'var(--red)',
-              color: 'var(--pink-bg)',
-              fontFamily: '"Archivo Black"',
-              fontSize: 90,
-              lineHeight: 1,
-              boxShadow: '0 20px 60px rgba(232, 53, 63, 0.25)',
-            }}
-          >
-            ?
+          <div style={{ animation: 'qFloat1 5s ease-in-out infinite' }}>
+            <div
+              className="rounded-full flex items-center justify-center"
+              style={{
+                width: 'clamp(70px, 11vw, 140px)',
+                height: 'clamp(70px, 11vw, 140px)',
+                backgroundColor: 'var(--red)',
+                color: 'var(--pink-bg)',
+                fontFamily: '"Archivo Black"',
+                fontSize: 'clamp(44px, 7vw, 88px)',
+                lineHeight: 1,
+                boxShadow: '0 24px 70px rgba(232, 53, 63, 0.3)',
+              }}
+            >
+              ?
+            </div>
           </div>
         </div>
 
-        {/* Small ? - bottom left */}
         <div
           className="absolute"
           style={{
-            bottom: '18%',
-            left: '6%',
-            transform: `translate(${mouse.x * -30}px, ${mouse.y * -20 + scrollY * -0.25}px) rotate(-18deg)`,
-            transition: 'transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)',
+            top: '18%',
+            left: '5%',
+            transform: `translate(${mouse.x * -12}px, ${scrollY * -0.35}px)`,
+            opacity: 0.75,
           }}
         >
-          <QuestionBadge size={72} />
+          <div style={{ animation: 'qFloat2 6.5s ease-in-out infinite 0.5s' }}>
+            <QuestionBadge size={50} />
+          </div>
         </div>
 
-        {/* Tiny ? - middle right */}
         <div
-          className="absolute"
+          className="absolute hidden md:block"
           style={{
-            top: '55%',
+            top: '58%',
+            right: '4%',
+            transform: `translate(${mouse.x * 26}px, ${scrollY * -0.3}px)`,
+            opacity: 0.6,
+          }}
+        >
+          <div style={{ animation: 'qFloat3 4.5s ease-in-out infinite 1s' }}>
+            <QuestionBadge size={46} />
+          </div>
+        </div>
+
+        <div
+          className="absolute hidden md:block"
+          style={{
+            bottom: '14%',
             right: '14%',
-            transform: `translate(${mouse.x * 40}px, ${scrollY * -0.2}px) rotate(35deg)`,
+            transform: `translate(${mouse.x * -16}px, ${scrollY * -0.5}px)`,
+            opacity: 0.5,
           }}
         >
-          <QuestionBadge size={36} style={{ opacity: 0.5 }} />
+          <div style={{ animation: 'qFloat4 5.8s ease-in-out infinite 0.3s' }}>
+            <QuestionBadge size={68} />
+          </div>
         </div>
 
-        {/* Decorative lines */}
-        <svg
-          className="absolute"
+        <div
+          className="absolute hidden lg:block"
           style={{
-            top: '40%',
-            left: '10%',
-            transform: `translateY(${scrollY * -0.1}px)`,
+            top: '42%',
+            right: '24%',
+            transform: `translate(${mouse.x * 14}px, ${scrollY * -0.6}px)`,
+            opacity: 0.4,
           }}
-          width="180"
-          height="60"
-          viewBox="0 0 180 60"
         >
-          <path d="M 2 30 Q 45 2, 90 30 T 178 30" stroke="var(--red)" strokeWidth="3" fill="none" strokeLinecap="round" />
-        </svg>
+          <div style={{ animation: 'qFloat5 4.2s ease-in-out infinite 0.7s' }}>
+            <QuestionBadge size={30} />
+          </div>
+        </div>
+
+        <div
+          className="absolute hidden md:block"
+          style={{
+            top: '70%',
+            left: '10%',
+            transform: `translate(${mouse.x * -18}px, ${scrollY * -0.42}px)`,
+            opacity: 0.35,
+          }}
+        >
+          <div style={{ animation: 'qFloat2 6s ease-in-out infinite 1.5s' }}>
+            <QuestionBadge size={38} />
+          </div>
+        </div>
       </div>
 
-      {/* Main hero content */}
       <div
-        className="relative max-w-7xl mx-auto px-6 md:px-10 pt-16 md:pt-24"
-        style={{
-          opacity: heroOpacity,
-          transform: `translateY(${heroY}px) scale(${heroScale})`,
-          transition: 'none',
-        }}
+        className="relative max-w-5xl mx-auto px-6 md:px-10 pt-10 md:pt-14"
+        style={{ opacity: heroOpacity, zIndex: 2 }}
       >
         <div className="flex flex-col gap-4">
-          {/* Small top label */}
           <Reveal>
-            <div className="flex items-center gap-3 mb-2">
-              <div style={{ width: 40, height: 2, backgroundColor: 'var(--red)' }} />
-              <span className="text-xs md:text-sm font-semibold tracking-widest uppercase" style={{ color: 'var(--red-dark)' }}>
+            <div className="flex items-center gap-3 mb-4">
+              <div style={{ width: 36, height: 2, backgroundColor: 'var(--red)' }} />
+              <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'var(--red-dark)' }}>
                 Brand Naming Studio · Bangkok
               </span>
             </div>
           </Reveal>
 
-          {/* Stacked huge title */}
           <Reveal delay={0.1}>
             <h1
               className="display"
               style={{
                 color: 'var(--red)',
-                fontSize: 'clamp(80px, 16vw, 240px)',
-                lineHeight: 0.85,
+                fontSize: 'clamp(80px, 13vw, 200px)',
+                lineHeight: 0.86,
+                transform: `translateY(${whoY}px)`,
+                willChange: 'transform',
               }}
             >
-              Who's
+              Who&apos;s
             </h1>
           </Reveal>
 
           <Reveal delay={0.2}>
-            <div className="flex items-center gap-4 md:gap-8 flex-wrap">
+            <div className="flex items-center gap-4 md:gap-6 flex-wrap">
               <h1
                 className="display"
                 style={{
                   color: 'var(--red)',
-                  fontSize: 'clamp(80px, 16vw, 240px)',
-                  lineHeight: 0.85,
+                  fontSize: 'clamp(80px, 13vw, 200px)',
+                  lineHeight: 0.86,
+                  transform: `translateY(${brandY}px)`,
+                  willChange: 'transform',
                 }}
               >
                 Brand
               </h1>
-              <div style={{ transform: 'translateY(-8%)' }}>
+              <div
+                style={{
+                  transform: `translateY(calc(-6% + ${questionY}px)) rotate(${scrollY * 0.05}deg)`,
+                  willChange: 'transform',
+                }}
+              >
                 <div
                   className="rounded-full inline-flex items-center justify-center"
                   style={{
-                    width: 'clamp(60px, 11vw, 160px)',
-                    height: 'clamp(60px, 11vw, 160px)',
+                    width: 'clamp(64px, 9vw, 130px)',
+                    height: 'clamp(64px, 9vw, 130px)',
                     backgroundColor: 'var(--red)',
                     color: 'var(--pink-bg)',
                     fontFamily: '"Archivo Black"',
-                    fontSize: 'clamp(40px, 7vw, 110px)',
+                    fontSize: 'clamp(42px, 6vw, 88px)',
                     lineHeight: 1,
-                    boxShadow: '0 16px 48px rgba(232, 53, 63, 0.3)',
+                    boxShadow: '0 18px 56px rgba(232, 53, 63, 0.35)',
                   }}
                 >
                   ?
@@ -357,15 +395,20 @@ const Hero = ({ scrollY }) => {
             </div>
           </Reveal>
 
-          {/* Tagline */}
           <Reveal delay={0.3}>
-            <div className="mt-6 md:mt-8 flex items-center gap-4">
-              <div style={{ width: 60, height: 3, backgroundColor: 'var(--red)' }} />
+            <div
+              className="mt-6 md:mt-8 flex items-center gap-4"
+              style={{
+                transform: `translateX(${taglineX}px)`,
+                willChange: 'transform',
+              }}
+            >
+              <div style={{ width: 48, height: 3, backgroundColor: 'var(--red)' }} />
               <h2
                 className="display"
                 style={{
                   color: 'var(--red-dark)',
-                  fontSize: 'clamp(28px, 4vw, 56px)',
+                  fontSize: 'clamp(26px, 3.2vw, 44px)',
                   letterSpacing: '-0.02em',
                   lineHeight: 1,
                 }}
@@ -375,45 +418,43 @@ const Hero = ({ scrollY }) => {
             </div>
           </Reveal>
 
-          {/* Description */}
           <Reveal delay={0.4}>
-            <div className="mt-8 md:mt-10 max-w-2xl">
-              <p className="text-lg md:text-2xl leading-snug" style={{ color: 'var(--ink)' }}>
+            <div className="mt-8 md:mt-10 max-w-xl">
+              <p className="text-base md:text-xl leading-snug" style={{ color: 'var(--ink)' }}>
                 We craft brand names that make people stop, pause, and ask{' '}
                 <span className="serif" style={{ color: 'var(--red)', fontSize: '1.1em' }}>who made this?</span>
               </p>
-              <p className="thai mt-3 text-base md:text-lg" style={{ color: 'var(--red-dark)', opacity: 0.85 }}>
+              <p className="thai mt-3 text-sm md:text-base" style={{ color: 'var(--red-dark)', opacity: 0.85 }}>
                 เราคิดชื่อแบรนด์ที่ทำให้คนต้องหยุดดู จดจำ และอยากรู้จักคุณ
               </p>
             </div>
           </Reveal>
 
-          {/* CTA buttons */}
           <Reveal delay={0.55}>
-            <div className="mt-10 md:mt-12 flex flex-col sm:flex-row gap-4">
+            <div className="relative mt-8 md:mt-10 flex flex-col sm:flex-row gap-4" style={{ zIndex: 20 }}>
               <a
                 href={FASTWORK_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex items-center justify-center gap-3 px-8 py-5 rounded-full font-bold transition-all hover:scale-[1.03] active:scale-[0.98]"
+                className="group inline-flex items-center justify-center gap-3 px-7 py-4 rounded-full font-bold transition-all hover:scale-[1.03] active:scale-[0.98]"
                 style={{
                   backgroundColor: 'var(--red)',
                   color: 'var(--pink-bg)',
-                  fontSize: 18,
+                  fontSize: 17,
                   boxShadow: '0 12px 32px rgba(232, 53, 63, 0.35)',
                 }}
               >
                 Start your brand
-                <span className="thai font-medium" style={{ opacity: 0.85, fontSize: 15 }}>เริ่มสร้างแบรนด์</span>
-                <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
+                <span className="thai font-medium" style={{ opacity: 0.85, fontSize: 14 }}>เริ่มสร้างแบรนด์</span>
+                <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
               </a>
               <a
                 href="#work"
-                className="inline-flex items-center justify-center gap-2 px-8 py-5 rounded-full font-semibold transition-all hover:scale-[1.02]"
+                className="inline-flex items-center justify-center gap-2 px-7 py-4 rounded-full font-semibold transition-all hover:scale-[1.02] backdrop-blur-sm"
                 style={{
-                  backgroundColor: 'transparent',
+                  backgroundColor: 'rgba(255, 229, 232, 0.6)',
                   color: 'var(--red-dark)',
-                  fontSize: 17,
+                  fontSize: 16,
                   border: '2px solid var(--red)',
                 }}
               >
@@ -422,23 +463,6 @@ const Hero = ({ scrollY }) => {
             </div>
           </Reveal>
         </div>
-      </div>
-
-      {/* Scroll indicator */}
-      <div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-        style={{ opacity: heroOpacity }}
-      >
-        <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'var(--red-dark)' }}>
-          Scroll
-        </span>
-        <div
-          className="w-px h-10"
-          style={{
-            background: 'linear-gradient(to bottom, var(--red), transparent)',
-            animation: 'pulse 2s ease-in-out infinite',
-          }}
-        />
       </div>
     </section>
   );
@@ -460,7 +484,7 @@ const StatsBar = () => {
               <div key={`${dupeIdx}-${i}`} className="flex items-center gap-4">
                 <span
                   className="display"
-                  style={{ color: 'var(--pink-bg)', fontSize: 36, lineHeight: 1 }}
+                  style={{ color: 'var(--pink-bg)', fontSize: 32, lineHeight: 1 }}
                 >
                   {stat.value}{stat.suffix || ''}
                 </span>
@@ -478,41 +502,52 @@ const StatsBar = () => {
 };
 
 const Services = () => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
   const services = [
     {
       title: "Brand Names",
       titleTh: "คิดชื่อแบรนด์",
       desc: "Five candidates per project. Each checked for meaning, sound, and ownability.",
-      icon: <Sparkles size={28} />,
+      icon: <Sparkles size={24} />,
     },
     {
       title: "Concept Sheets",
       titleTh: "คอนเซ็ปต์แบรนด์",
       desc: "The story behind the name. What it means, how it sounds, why it sticks.",
-      icon: <MessageCircle size={28} />,
+      icon: <MessageCircle size={24} />,
     },
     {
       title: "Availability Checks",
       titleTh: "เช็กโดเมน + โซเชียล",
       desc: "Domain, handle, and trademark conflict checks before you commit.",
-      icon: <Check size={28} />,
+      icon: <Check size={24} />,
     },
     {
       title: "Slogans & Voice",
       titleTh: "สโลแกน + น้ำเสียงแบรนด์",
       desc: "Available in the premium package. Two taglines that carry the brand forward.",
-      icon: <Star size={28} />,
+      icon: <Star size={24} />,
     },
   ];
 
+  const scroll = (dir: 'left' | 'right') => {
+    if (!scrollRef.current) return;
+    const amount = 340;
+    scrollRef.current.scrollBy({
+      left: dir === 'left' ? -amount : amount,
+      behavior: 'smooth',
+    });
+  };
+
   return (
-    <section className="relative py-24 md:py-36 px-6 md:px-10">
-      <div className="max-w-7xl mx-auto">
+    <section className="relative py-20 md:py-28">
+      <div className="max-w-5xl mx-auto px-6 md:px-10">
         <Reveal>
-          <div className="flex items-end justify-between flex-wrap gap-6 mb-16">
-            <div className="max-w-2xl">
+          <div className="flex items-end justify-between flex-wrap gap-6 mb-12">
+            <div className="max-w-xl">
               <div className="flex items-center gap-3 mb-4">
-                <QuestionBadge size={28} />
+                <QuestionBadge size={24} />
                 <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'var(--red-dark)' }}>
                   What we do
                 </span>
@@ -521,45 +556,70 @@ const Services = () => {
                 className="display"
                 style={{
                   color: 'var(--red)',
-                  fontSize: 'clamp(44px, 7vw, 96px)',
+                  fontSize: 'clamp(36px, 5vw, 64px)',
                 }}
               >
                 Names that <span className="serif" style={{ fontWeight: 400 }}>stick.</span>
               </h2>
-              <p className="thai mt-3 text-lg" style={{ color: 'var(--red-dark)' }}>
+              <p className="thai mt-3 text-base" style={{ color: 'var(--red-dark)' }}>
                 ชื่อที่คนจำ ไม่ใช่แค่ชื่อที่ฟังดี
               </p>
             </div>
+            <div className="hidden md:flex gap-2">
+              <button
+                onClick={() => scroll('left')}
+                aria-label="Scroll left"
+                className="w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+                style={{ border: '2px solid var(--red)', color: 'var(--red)' }}
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button
+                onClick={() => scroll('right')}
+                aria-label="Scroll right"
+                className="w-11 h-11 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95"
+                style={{ backgroundColor: 'var(--red)', color: 'var(--pink-bg)' }}
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
           </div>
         </Reveal>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-6">
+      <div
+        ref={scrollRef}
+        className="overflow-x-auto scrollbar-hide"
+        style={{ scrollSnapType: 'x mandatory' }}
+      >
+        <div className="flex gap-5" style={{ width: 'max-content', paddingLeft: 'max(24px, calc((100vw - 1024px) / 2 + 40px))', paddingRight: 'max(24px, calc((100vw - 1024px) / 2 + 40px))' }}>
           {services.map((s, i) => (
-            <Reveal key={i} delay={i * 0.08}>
+            <div
+              key={i}
+              className="flex-shrink-0 p-8 rounded-3xl"
+              style={{
+                width: 'min(85vw, 300px)',
+                backgroundColor: 'var(--cream)',
+                border: '1.5px solid rgba(232, 53, 63, 0.12)',
+                scrollSnapAlign: 'start',
+              }}
+            >
               <div
-                className="group relative p-8 md:p-10 rounded-3xl transition-all hover:-translate-y-1 h-full"
-                style={{
-                  backgroundColor: 'var(--cream)',
-                  border: '1.5px solid rgba(232, 53, 63, 0.12)',
-                }}
+                className="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-5"
+                style={{ backgroundColor: 'var(--red)', color: 'var(--pink-bg)' }}
               >
-                <div
-                  className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-6"
-                  style={{ backgroundColor: 'var(--red)', color: 'var(--pink-bg)' }}
-                >
-                  {s.icon}
-                </div>
-                <h3 className="display text-2xl md:text-3xl mb-1" style={{ color: 'var(--red)', letterSpacing: '-0.02em' }}>
-                  {s.title}
-                </h3>
-                <p className="thai text-sm mb-4" style={{ color: 'var(--red-dark)', opacity: 0.8 }}>
-                  {s.titleTh}
-                </p>
-                <p className="text-base md:text-lg leading-relaxed" style={{ color: 'var(--ink)' }}>
-                  {s.desc}
-                </p>
+                {s.icon}
               </div>
-            </Reveal>
+              <h3 className="display text-xl md:text-2xl mb-1" style={{ color: 'var(--red)', letterSpacing: '-0.02em' }}>
+                {s.title}
+              </h3>
+              <p className="thai text-sm mb-3" style={{ color: 'var(--red-dark)', opacity: 0.8 }}>
+                {s.titleTh}
+              </p>
+              <p className="text-sm md:text-base leading-relaxed" style={{ color: 'var(--ink)' }}>
+                {s.desc}
+              </p>
+            </div>
           ))}
         </div>
       </div>
@@ -567,40 +627,15 @@ const Services = () => {
   );
 };
 
-const Portfolio = ({ scrollY }) => {
-  const sectionRef = useRef(null);
-  const [sectionTop, setSectionTop] = useState(0);
-
-  useEffect(() => {
-    const updateTop = () => {
-      if (sectionRef.current) {
-        setSectionTop(sectionRef.current.offsetTop);
-      }
-    };
-    updateTop();
-    window.addEventListener('resize', updateTop);
-    return () => window.removeEventListener('resize', updateTop);
-  }, []);
-
-  // Relative scroll inside section
-  const relY = Math.max(0, scrollY - sectionTop + 400);
-
+const Portfolio = () => {
   return (
-    <section id="work" ref={sectionRef} className="relative py-24 md:py-36 px-6 md:px-10" style={{ backgroundColor: 'var(--pink-lt)' }}>
-      {/* Decorative floating shapes */}
-      <div
-        className="absolute top-40 right-10 pointer-events-none opacity-60"
-        style={{ transform: `translateY(${relY * -0.15}px) rotate(${relY * 0.05}deg)` }}
-      >
-        <QuestionBadge size={60} />
-      </div>
-
-      <div className="max-w-7xl mx-auto relative">
+    <section id="work" className="relative py-20 md:py-28 px-6 md:px-10" style={{ backgroundColor: 'var(--pink-lt)' }}>
+      <div className="max-w-5xl mx-auto relative">
         <Reveal>
-          <div className="flex items-end justify-between flex-wrap gap-6 mb-20">
+          <div className="flex items-end justify-between flex-wrap gap-6 mb-14">
             <div>
               <div className="flex items-center gap-3 mb-4">
-                <div style={{ width: 40, height: 2, backgroundColor: 'var(--red)' }} />
+                <div style={{ width: 36, height: 2, backgroundColor: 'var(--red)' }} />
                 <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'var(--red-dark)' }}>
                   Selected Work · ผลงาน
                 </span>
@@ -609,91 +644,84 @@ const Portfolio = ({ scrollY }) => {
                 className="display"
                 style={{
                   color: 'var(--red)',
-                  fontSize: 'clamp(44px, 7vw, 96px)',
+                  fontSize: 'clamp(36px, 5vw, 64px)',
                 }}
               >
-                Names we've made
+                Names we&apos;ve made
               </h2>
             </div>
-            <p className="max-w-sm text-base md:text-lg" style={{ color: 'var(--ink)', opacity: 0.8 }}>
-              Every brand below started as a conversation. Here's what came out the other side.
+            <p className="max-w-xs text-sm md:text-base" style={{ color: 'var(--ink)', opacity: 0.8 }}>
+              Every brand below started as a conversation. Here&apos;s what came out the other side.
             </p>
           </div>
         </Reveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
-          {BRANDS.map((brand, i) => {
-            const offset = i % 2 === 0 ? relY * -0.03 : relY * -0.06;
-            return (
-              <Reveal key={i} delay={i * 0.05}>
-                <a
-                  href={FASTWORK_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group block"
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start">
+          {BRANDS.map((brand, i) => (
+            <Reveal key={i} delay={i * 0.05}>
+              <a
+                href={FASTWORK_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group block"
+              >
+                <div
+                  className="relative overflow-hidden rounded-3xl"
                   style={{
-                    transform: `translateY(${offset}px)`,
-                    transition: 'transform 0.1s linear',
+                    aspectRatio: '16 / 10',
+                    backgroundColor: 'var(--pink-deep)',
+                    boxShadow: '0 18px 48px rgba(184, 21, 31, 0.12)',
                   }}
                 >
+                  <img
+                    src={brand.img}
+                    alt={brand.name}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    loading="lazy"
+                  />
                   <div
-                    className="relative overflow-hidden rounded-3xl"
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-6 md:p-7"
                     style={{
-                      aspectRatio: '16 / 10',
-                      backgroundColor: 'var(--pink-deep)',
-                      boxShadow: '0 18px 48px rgba(184, 21, 31, 0.12)',
+                      background: 'linear-gradient(to top, rgba(26, 10, 12, 0.85) 0%, transparent 60%)',
                     }}
                   >
-                    <img
-                      src={brand.img}
-                      alt={brand.name}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                    <div
-                      className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-8"
+                    <p className="text-white text-sm md:text-base leading-snug max-w-md">
+                      {brand.story}
+                    </p>
+                  </div>
+                  <div
+                    className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
+                    style={{ backgroundColor: 'var(--pink-bg)', color: 'var(--red-dark)' }}
+                  >
+                    {brand.tag}
+                  </div>
+                </div>
+                <div className="mt-4 flex items-start justify-between gap-4">
+                  <div>
+                    <h3
+                      className="display"
                       style={{
-                        background: 'linear-gradient(to top, rgba(26, 10, 12, 0.85) 0%, transparent 60%)',
+                        color: 'var(--red)',
+                        fontSize: 'clamp(22px, 2.5vw, 30px)',
+                        letterSpacing: '-0.02em',
+                        lineHeight: 1,
                       }}
                     >
-                      <p className="text-white text-base md:text-lg leading-snug max-w-md">
-                        {brand.story}
-                      </p>
-                    </div>
-                    <div
-                      className="absolute top-5 right-5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider"
-                      style={{ backgroundColor: 'var(--pink-bg)', color: 'var(--red-dark)' }}
-                    >
-                      {brand.tag}
-                    </div>
+                      {brand.name}
+                    </h3>
+                    <p className="mt-2 text-sm" style={{ color: 'var(--ink)', opacity: 0.7 }}>
+                      {brand.category} · <span className="thai">{brand.categoryTh}</span>
+                    </p>
                   </div>
-                  <div className="mt-5 flex items-start justify-between gap-4">
-                    <div>
-                      <h3
-                        className="display"
-                        style={{
-                          color: 'var(--red)',
-                          fontSize: 'clamp(26px, 3vw, 38px)',
-                          letterSpacing: '-0.02em',
-                          lineHeight: 1,
-                        }}
-                      >
-                        {brand.name}
-                      </h3>
-                      <p className="mt-2 text-sm md:text-base" style={{ color: 'var(--ink)', opacity: 0.7 }}>
-                        {brand.category} · <span className="thai">{brand.categoryTh}</span>
-                      </p>
-                    </div>
-                    <ArrowUpRight
-                      size={28}
-                      style={{ color: 'var(--red)' }}
-                      className="transition-transform group-hover:rotate-45 shrink-0 mt-1"
-                    />
-                  </div>
-                </a>
-              </Reveal>
-            );
-          })}
+                  <ArrowUpRight
+                    size={24}
+                    style={{ color: 'var(--red)' }}
+                    className="transition-transform group-hover:rotate-45 shrink-0 mt-1"
+                  />
+                </div>
+              </a>
+            </Reveal>
+          ))}
         </div>
       </div>
     </section>
@@ -717,12 +745,12 @@ const Process = () => {
   ];
 
   return (
-    <section id="process" className="relative py-24 md:py-36 px-6 md:px-10" style={{ backgroundColor: 'var(--red)' }}>
-      <div className="max-w-7xl mx-auto">
+    <section id="process" className="relative py-20 md:py-28 px-6 md:px-10" style={{ backgroundColor: 'var(--red)' }}>
+      <div className="max-w-5xl mx-auto">
         <Reveal>
-          <div className="mb-16 md:mb-24">
+          <div className="mb-12 md:mb-16">
             <div className="flex items-center gap-3 mb-4">
-              <div style={{ width: 40, height: 2, backgroundColor: 'var(--pink-bg)' }} />
+              <div style={{ width: 36, height: 2, backgroundColor: 'var(--pink-bg)' }} />
               <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'var(--pink-bg)', opacity: 0.8 }}>
                 How it works · ขั้นตอนการทำงาน
               </span>
@@ -731,7 +759,7 @@ const Process = () => {
               className="display"
               style={{
                 color: 'var(--pink-bg)',
-                fontSize: 'clamp(44px, 7vw, 96px)',
+                fontSize: 'clamp(36px, 5vw, 64px)',
               }}
             >
               Two steps. <span className="serif" style={{ fontWeight: 400 }}>Done.</span>
@@ -739,32 +767,32 @@ const Process = () => {
           </div>
         </Reveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
           {steps.map((step, i) => (
             <Reveal key={i} delay={i * 0.15}>
               <div
-                className="p-10 md:p-12 rounded-3xl h-full"
+                className="p-8 md:p-10 rounded-3xl h-full"
                 style={{
                   backgroundColor: 'var(--pink-bg)',
                   border: '2px solid var(--red-dark)',
                 }}
               >
                 <div
-                  className="display mb-6"
-                  style={{ color: 'var(--red)', fontSize: 80, letterSpacing: '-0.04em', lineHeight: 0.9 }}
+                  className="display mb-5"
+                  style={{ color: 'var(--red)', fontSize: 64, letterSpacing: '-0.04em', lineHeight: 0.9 }}
                 >
                   {step.n}
                 </div>
                 <h3
                   className="display mb-2"
-                  style={{ color: 'var(--red-dark)', fontSize: 'clamp(28px, 3.5vw, 44px)', letterSpacing: '-0.02em' }}
+                  style={{ color: 'var(--red-dark)', fontSize: 'clamp(24px, 3vw, 34px)', letterSpacing: '-0.02em' }}
                 >
                   {step.title}
                 </h3>
-                <p className="thai text-base mb-6" style={{ color: 'var(--red-dark)', opacity: 0.85 }}>
+                <p className="thai text-sm mb-5" style={{ color: 'var(--red-dark)', opacity: 0.85 }}>
                   {step.titleTh}
                 </p>
-                <p className="text-lg leading-relaxed" style={{ color: 'var(--ink)' }}>
+                <p className="text-base leading-relaxed" style={{ color: 'var(--ink)' }}>
                   {step.desc}
                 </p>
               </div>
@@ -791,7 +819,6 @@ const Pricing = () => {
         "One revision round",
         "1:1 call to walk through names",
       ],
-      featuresTh: "5 ชื่อแบรนด์ · คอนเซ็ปต์ · เช็กโดเมน · แก้ไข 1 รอบ",
       cta: "Start here",
       recommended: false,
     },
@@ -808,19 +835,18 @@ const Pricing = () => {
         "One revision round",
         "1:1 call to walk through names",
       ],
-      featuresTh: "ทุกอย่างใน Name Me Now · + 2 สโลแกน · + แนวทางแบรนด์",
       cta: "Go bigger",
       recommended: true,
     },
   ];
 
   return (
-    <section id="pricing" className="relative py-24 md:py-36 px-6 md:px-10">
-      <div className="max-w-7xl mx-auto">
+    <section id="pricing" className="relative py-20 md:py-28 px-6 md:px-10">
+      <div className="max-w-5xl mx-auto">
         <Reveal>
-          <div className="text-center mb-16 md:mb-20">
+          <div className="text-center mb-14 md:mb-16">
             <div className="flex items-center gap-3 justify-center mb-4">
-              <QuestionBadge size={28} />
+              <QuestionBadge size={24} />
               <span className="text-xs font-semibold tracking-widest uppercase" style={{ color: 'var(--red-dark)' }}>
                 Packages · แพ็กเกจ
               </span>
@@ -829,7 +855,7 @@ const Pricing = () => {
               className="display"
               style={{
                 color: 'var(--red)',
-                fontSize: 'clamp(44px, 7vw, 96px)',
+                fontSize: 'clamp(36px, 5vw, 64px)',
               }}
             >
               Pick your pace.
@@ -837,11 +863,11 @@ const Pricing = () => {
           </div>
         </Reveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
           {packages.map((pkg, i) => (
             <Reveal key={i} delay={i * 0.1}>
               <div
-                className="relative p-10 md:p-12 rounded-3xl h-full flex flex-col"
+                className="relative p-8 md:p-10 rounded-3xl h-full flex flex-col"
                 style={{
                   backgroundColor: pkg.recommended ? 'var(--red)' : 'var(--cream)',
                   color: pkg.recommended ? 'var(--pink-bg)' : 'var(--ink)',
@@ -851,17 +877,17 @@ const Pricing = () => {
               >
                 {pkg.recommended && (
                   <div
-                    className="absolute -top-3 left-10 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider"
+                    className="absolute -top-3 left-8 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider"
                     style={{ backgroundColor: 'var(--pink-bg)', color: 'var(--red-dark)' }}
                   >
                     ★ Most Popular
                   </div>
                 )}
                 <h3
-                  className="display mb-4"
+                  className="display mb-3"
                   style={{
                     color: pkg.recommended ? 'var(--pink-bg)' : 'var(--red)',
-                    fontSize: 'clamp(32px, 4vw, 48px)',
+                    fontSize: 'clamp(26px, 3vw, 36px)',
                     letterSpacing: '-0.02em',
                   }}
                 >
@@ -872,7 +898,7 @@ const Pricing = () => {
                     className="display"
                     style={{
                       color: pkg.recommended ? 'var(--pink-bg)' : 'var(--red)',
-                      fontSize: 72,
+                      fontSize: 56,
                       lineHeight: 1,
                       letterSpacing: '-0.04em',
                     }}
@@ -880,19 +906,19 @@ const Pricing = () => {
                     ฿{pkg.price}
                   </span>
                 </div>
-                <p className="text-sm mb-8 opacity-80">
+                <p className="text-sm mb-7 opacity-80">
                   {pkg.days} turnaround · <span className="thai">ส่งงานใน {pkg.daysTh}</span>
                 </p>
 
-                <ul className="space-y-3 mb-10 flex-1">
+                <ul className="space-y-3 mb-8 flex-1">
                   {pkg.features.map((f, idx) => (
                     <li key={idx} className="flex items-start gap-3">
                       <Check
-                        size={20}
+                        size={18}
                         className="shrink-0 mt-0.5"
                         style={{ color: pkg.recommended ? 'var(--pink-bg)' : 'var(--red)' }}
                       />
-                      <span className="text-base">{f}</span>
+                      <span className="text-sm md:text-base">{f}</span>
                     </li>
                   ))}
                 </ul>
@@ -901,15 +927,15 @@ const Pricing = () => {
                   href={FASTWORK_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group inline-flex items-center justify-center gap-2 w-full px-6 py-4 rounded-full font-bold transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  className="group inline-flex items-center justify-center gap-2 w-full px-6 py-3.5 rounded-full font-bold transition-all hover:scale-[1.02] active:scale-[0.98]"
                   style={{
                     backgroundColor: pkg.recommended ? 'var(--pink-bg)' : 'var(--red)',
                     color: pkg.recommended ? 'var(--red-dark)' : 'var(--pink-bg)',
-                    fontSize: 17,
+                    fontSize: 16,
                   }}
                 >
                   {pkg.cta}
-                  <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                  <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
                 </a>
               </div>
             </Reveal>
@@ -922,25 +948,21 @@ const Pricing = () => {
 
 const FinalCTA = () => {
   return (
-    <section className="relative py-32 md:py-48 px-6 md:px-10 overflow-hidden" style={{ backgroundColor: 'var(--pink-bg)' }}>
-      {/* Floating ? shapes */}
-      <div className="absolute top-20 left-10 opacity-40" style={{ animation: 'slowfloat 6s ease-in-out infinite' }}>
-        <QuestionBadge size={80} />
+    <section className="relative py-24 md:py-36 px-6 md:px-10 overflow-hidden" style={{ backgroundColor: 'var(--pink-bg)' }}>
+      <div className="absolute top-16 left-4 md:left-10 opacity-40" style={{ animation: 'slowfloat 6s ease-in-out infinite' }}>
+        <QuestionBadge size={60} />
       </div>
-      <div className="absolute bottom-20 right-16 opacity-50" style={{ animation: 'slowfloat 5s ease-in-out infinite', animationDelay: '1s' }}>
-        <QuestionBadge size={120} />
-      </div>
-      <div className="absolute top-40 right-32 opacity-30" style={{ animation: 'slowfloat 7s ease-in-out infinite', animationDelay: '2s' }}>
-        <QuestionBadge size={50} />
+      <div className="absolute bottom-16 right-4 md:right-12 opacity-50" style={{ animation: 'slowfloat 5s ease-in-out infinite', animationDelay: '1s' }}>
+        <QuestionBadge size={90} />
       </div>
 
-      <div className="relative max-w-5xl mx-auto text-center">
+      <div className="relative max-w-3xl mx-auto text-center">
         <Reveal>
           <h2
             className="display mb-6"
             style={{
               color: 'var(--red)',
-              fontSize: 'clamp(56px, 10vw, 160px)',
+              fontSize: 'clamp(44px, 7vw, 104px)',
               letterSpacing: '-0.04em',
               lineHeight: 0.9,
             }}
@@ -950,15 +972,15 @@ const FinalCTA = () => {
         </Reveal>
 
         <Reveal delay={0.1}>
-          <p className="thai text-xl md:text-2xl mb-4" style={{ color: 'var(--red-dark)' }}>
+          <p className="thai text-lg md:text-xl mb-4" style={{ color: 'var(--red-dark)' }}>
             พร้อมทำให้คนต้องถามชื่อแบรนด์คุณรึยัง?
           </p>
         </Reveal>
 
         <Reveal delay={0.2}>
-          <p className="text-lg md:text-xl mb-12 max-w-2xl mx-auto" style={{ color: 'var(--ink)', opacity: 0.8 }}>
+          <p className="text-base md:text-lg mb-10 max-w-xl mx-auto" style={{ color: 'var(--ink)', opacity: 0.8 }}>
             Hire us through Fastwork with escrow protection.
-            Chat first, pay only when you're ready.
+            Chat first, pay only when you&apos;re ready.
           </p>
         </Reveal>
 
@@ -967,21 +989,21 @@ const FinalCTA = () => {
             href={FASTWORK_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="group inline-flex items-center justify-center gap-4 px-12 py-7 rounded-full font-bold transition-all hover:scale-[1.04] active:scale-[0.98]"
+            className="group inline-flex items-center justify-center gap-3 px-10 py-5 rounded-full font-bold transition-all hover:scale-[1.04] active:scale-[0.98]"
             style={{
               backgroundColor: 'var(--red)',
               color: 'var(--pink-bg)',
-              fontSize: 22,
+              fontSize: 19,
               boxShadow: '0 20px 60px rgba(232, 53, 63, 0.35)',
             }}
           >
             <span>Start your brand on Fastwork</span>
-            <ArrowUpRight size={26} className="transition-transform group-hover:rotate-45" />
+            <ArrowUpRight size={22} className="transition-transform group-hover:rotate-45" />
           </a>
         </Reveal>
 
         <Reveal delay={0.4}>
-          <p className="mt-6 text-sm" style={{ color: 'var(--red-dark)', opacity: 0.7 }}>
+          <p className="mt-5 text-sm" style={{ color: 'var(--red-dark)', opacity: 0.7 }}>
             No charge until you agree on scope · <span className="thai">ไม่เสียค่าใช้จ่ายจนกว่าจะตกลงจ้างงาน</span>
           </p>
         </Reveal>
@@ -992,15 +1014,15 @@ const FinalCTA = () => {
 
 const Footer = () => {
   return (
-    <footer className="relative py-16 px-6 md:px-10" style={{ backgroundColor: 'var(--ink)', color: 'var(--pink-bg)' }}>
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-12">
+    <footer className="relative py-14 px-6 md:px-10" style={{ backgroundColor: 'var(--ink)', color: 'var(--pink-bg)' }}>
+      <div className="max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <span style={{ fontFamily: '"Archivo Black"', color: 'var(--pink-bg)', fontSize: 24, letterSpacing: '-0.04em' }}>
+              <span style={{ fontFamily: '"Archivo Black"', color: 'var(--pink-bg)', fontSize: 22, letterSpacing: '-0.04em' }}>
                 whosbrand
               </span>
-              <QuestionBadge size={26} />
+              <QuestionBadge size={24} />
             </div>
             <p className="text-sm leading-relaxed opacity-70 max-w-xs">
               Brand naming studio based in Bangkok.
@@ -1039,7 +1061,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="pt-8 border-t flex flex-col md:flex-row justify-between items-start md:items-center gap-3" style={{ borderColor: 'rgba(255, 209, 214, 0.15)' }}>
+        <div className="pt-6 border-t flex flex-col md:flex-row justify-between items-start md:items-center gap-3" style={{ borderColor: 'rgba(255, 229, 232, 0.15)' }}>
           <p className="text-xs opacity-50">© {new Date().getFullYear()} Whosbrand. All rights reserved.</p>
           <p className="text-xs opacity-50 thai">สร้างด้วยความตั้งใจจากกรุงเทพฯ</p>
         </div>
@@ -1048,7 +1070,6 @@ const Footer = () => {
   );
 };
 
-// Root component with font loading
 export default function Page() {
   const scrollY = useScrollY();
 
@@ -1075,15 +1096,30 @@ export default function Page() {
         .display { font-family: "Archivo Black", sans-serif; font-weight: 900; letter-spacing: -0.03em; line-height: 0.95; }
         .serif { font-family: "Instrument Serif", serif; font-style: italic; font-weight: 400; }
 
+        @keyframes qFloat1 {
+          0%, 100% { transform: translateY(0px) rotate(12deg); }
+          50% { transform: translateY(-22px) rotate(15deg); }
+        }
+        @keyframes qFloat2 {
+          0%, 100% { transform: translateY(0px) rotate(-20deg); }
+          50% { transform: translateY(-14px) rotate(-24deg); }
+        }
+        @keyframes qFloat3 {
+          0%, 100% { transform: translateY(0px) rotate(38deg); }
+          50% { transform: translateY(-18px) rotate(42deg); }
+        }
+        @keyframes qFloat4 {
+          0%, 100% { transform: translateY(0px) rotate(-8deg); }
+          50% { transform: translateY(-24px) rotate(-5deg); }
+        }
+        @keyframes qFloat5 {
+          0%, 100% { transform: translateY(0px) rotate(55deg); }
+          50% { transform: translateY(-12px) rotate(62deg); }
+        }
+
         @keyframes slowfloat {
           0%, 100% { transform: translateY(0) rotate(0deg); }
           50% { transform: translateY(-16px) rotate(4deg); }
-        }
-        .float-anim { animation: slowfloat 5s ease-in-out infinite; }
-
-        @keyframes pulse {
-          0%, 100% { opacity: 1; transform: scaleY(1); }
-          50% { opacity: 0.4; transform: scaleY(0.6); }
         }
 
         .marquee { animation: scrollX 38s linear infinite; }
@@ -1092,15 +1128,18 @@ export default function Page() {
           to { transform: translateX(-50%); }
         }
 
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
         ::selection { background: var(--red); color: var(--pink-bg); }
       `}</style>
 
-      <div style={{ backgroundColor: 'var(--pink-bg)', color: 'var(--ink)', fontFamily: '"Archivo", system-ui, sans-serif', overflow: 'hidden' }}>
+      <div style={{ color: 'var(--ink)', fontFamily: '"Archivo", system-ui, sans-serif', overflow: 'hidden' }}>
         <Header scrollY={scrollY} />
         <Hero scrollY={scrollY} />
         <StatsBar />
         <Services />
-        <Portfolio scrollY={scrollY} />
+        <Portfolio />
         <Process />
         <Pricing />
         <FinalCTA />
