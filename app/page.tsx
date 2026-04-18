@@ -87,9 +87,9 @@ const STATS = [
 const useScrollY = () => {
   const [scrollY, setScrollY] = useState(0);
   useEffect(() => {
-    let rafId;
+let rafId: number | null = null;
     const onScroll = () => {
-      if (rafId) return;
+      if (rafId) cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
         setScrollY(window.scrollY);
         rafId = null;
